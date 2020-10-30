@@ -1,0 +1,176 @@
+<template>
+    <require from="resources/value-converters/json-value-converter"></require>
+    <require from="resources/value-converters/integer-value-converter"></require>
+    <require from="resources/value-converters/integer-array-value-converter"></require>
+
+    <style>
+        body {
+            background: #111;
+            color: #eee;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .input {
+            display: flex;
+            margin-bottom: 5px;
+        }
+
+        .input label {
+            width: 180px;
+        }
+
+        .input label + * {
+            box-sizing: border-box;
+            max-width: 300px;
+        }
+
+        .input input[type=text], .input input[type=number], textarea {
+            flex: 1 1 100%;
+            min-width: 0;
+            width: auto;
+        }
+
+        .input > div {
+            display: flex;
+        }
+
+        pre {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+    </style>
+
+    <div style="display: flex;">
+        <div style="margin-right: 20px;">
+            <h1>Cyberball Configuration Builder</h1>
+
+            <h2>Player</h2>
+
+            <div class="input">
+                <label>Name</label>
+                <input type="text" value.bind="settings.player.name" />
+            </div>
+
+            <div class="input">
+                <label>Tint Color</label>
+                <input type="color" value.bind="settings.player.tint" />
+            </div>
+
+            <div class="input">
+                <label>Portrait</label>
+                <input type="text" value.bind="settings.player.portrait" />
+            </div>
+
+            <h2>
+                CPUs
+                <button click.delegate="addCPU()">+ Add CPU</button>
+                <button click.delegate="removeCPU()">- Remove CPU</button>
+            </h2>
+
+            <div repeat.for="cpu of settings.computerPlayers">
+                <div class="input">
+                    <label>Name</label>
+                    <input type="text" value.bind="cpu.name" />
+                </div>
+
+                <div class="input">
+                    <label>Tint Color</label>
+                    <input type="color" value.bind="cpu.tint" />
+                </div>
+
+                <div class="input">
+                    <label>Portrait</label>
+                    <input type="text" value.bind="cpu.portrait" />
+                </div>
+
+                <div class="input">
+                    <label>Throw Delay</label>
+                    <input type="number" value.bind="cpu.throwDelay | integer" />
+                </div>
+
+                <div class="input">
+                    <label>Throw Delay Variance</label>
+                    <input type="number" value.bind="cpu.throwDelayVariance | integer" />
+                </div>
+
+                <div class="input">
+                    <label>Catch Delay</label>
+                    <input type="number" value.bind="cpu.catchDelay | integer" />
+                </div>
+
+                <div class="input">
+                    <label>Catch Delay Variance</label>
+                    <input type="number" value.bind="cpu.catchDelayVariance | integer" />
+                </div>
+
+
+                <div class="input">
+                    <label>Target Preference</label>
+
+                    <div>
+                        <input repeat.for="target of cpu.targetPreference" type="number" value.bind="cpu.targetPreference[$index] | integer" />
+                    </div>
+                </div>
+
+                <hr />
+            </div>
+
+            <h2>Gameplay</h2>
+
+            <div class="input">
+                <label>Throw Count</label>
+                <input type="number" value.bind="settings.throwCount | integer" />
+            </div>
+
+            <div class="input">
+                <label>Ball Speed</label>
+                <input type="number" value.bind="settings.ballSpeed | integer" />
+            </div>
+
+            <div class="input">
+                <label>Ball Tint Color</label>
+                <input type="color" value.bind="settings.ballTint" />
+            </div>
+
+            <div class="input">
+                <label>Portrait Height</label>
+                <input type="number" value.bind="settings.portraitHeight | integer" />
+            </div>
+
+            <div class="input">
+                <label>Use Schedule</label>
+                <input type="checkbox" checked.bind="settings.useSchedule" />
+            </div>
+
+            <div class="input" if.bind="settings.useSchedule">
+                <label>Schedule</label>
+                <textarea value.bind="settings.schedule | integerArray & updateTrigger:'blur'"></textarea>
+            </div>
+
+            <div class="input">
+                <label>Schedule Honors Throw Count</label>
+                <input type="checkbox" checked.bind="settings.scheduleHonorsThrowCount" />
+            </div>
+
+            <div class="input">
+                <label>Game Over Text</label>
+                <input type="text" value.bind="settings.gameOverText" />
+            </div>
+
+            <button click.delegate="saveSettings()">Save</button>
+        </div>
+
+        <div style="overflow-y: auto;">
+            <pre>${settings | json & signal: 'save-settings'}</pre>
+        </div>
+    </div>
+
+    <div>
+        <h1>
+            Code
+            <button id="copy" data-clipboard-target="#code">&#10697; Copy</button>
+            <button click.delegate="testGame()">&#129514; Test</button>
+        </h1>
+        <pre id="code">&lt;iframe id="cyberball" width="100%" height="580" src="${url}"&gt;&lt;/iframe&gt;</pre>
+    </div>
+</template>
